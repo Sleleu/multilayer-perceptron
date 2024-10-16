@@ -22,8 +22,8 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    if args.action in ['split', 'train'] and not args.dataset:
-        parser.error("-d | --dataset <dataset name> is required for 'split' or 'train' actions.")
+    #if args.action in ['split', 'train'] and not args.dataset:
+    #    parser.error("-d | --dataset <dataset name> is required for 'split' or 'train' actions.")
 
     return args
 
