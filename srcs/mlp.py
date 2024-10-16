@@ -1,6 +1,7 @@
 #!/bin/python3
 
 from split_dataset import split_dataset
+from training import training
 import argparse
 
 
@@ -21,14 +22,15 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    if args.action in ['split'] and not args.dataset:
-        parser.error("-d | --dataset is required for 'split' actions.")
+    if args.action in ['split', 'train'] and not args.dataset:
+        parser.error("-d | --dataset <dataset name> is required for 'split' or 'train' actions.")
 
     return args
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    if args.action == 'split':
-        if args.dataset:
-            split_dataset(args.dataset)
+    if args.action == "split":
+        split_dataset(args.dataset)
+    elif args.action == "train":
+        training(args.dataset)
