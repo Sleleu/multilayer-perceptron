@@ -35,7 +35,7 @@ def split_dataset(dataset_name: str)-> None:
 
     # Récupérer les 0,1 colonne 0 et les mettre dans un dataframe y de dimension (n[0], 1)
     y = df.iloc[:, 0].to_frame()
-    split_value = df.shape[0] // 2 # 284, permet de split en deux
+    split_value = 500  #df.shape[0] // 2 # 284, permet de split en deux
 
     X_train, X_test = split_features(df, split_value)
     y_train, y_test = split_labels(y, split_value)
