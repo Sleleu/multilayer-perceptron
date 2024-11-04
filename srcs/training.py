@@ -5,21 +5,26 @@ from display import plot_learning_curves
 from activation import Activation
 from Scaler import Scaler
 
-def compute_mean_std(X):
-    mean = np.mean(X, axis=0)
-    std = np.std(X, axis=0)
-    return mean, std
-
-def z_score_normalize(X, mean, std):
-    return (X - mean) / std
-
-def compute_min_max(X):
-    X_min = np.min(X, axis=0)
-    X_max = np.max(X, axis=0)
-    return X_min, X_max
-
-def min_max_normalize(X, X_min, X_max):
-    return (X - X_min) / (X_max - X_min)
+class MLP:
+    def __init__(
+            self,
+            hidden_layer_sizes=(24, 24),
+            output_layer_size=2,
+            activation="sigmoid",
+            output_function="softmax",
+            loss="sparseCategoricalCrossentropy",
+            learning_rate=0.0314,
+            epochs=84,
+            batch_size=8,
+            ):
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.output_layer_size = output_layer_size
+        self.activation = activation
+        self.output_function = output_function
+        self.loss = loss
+        self.learning_rate = learning_rate
+        self.epochs = epochs
+        self.batch_size = batch_size
 
 def feed_forward(X, W, b):
     A = []
@@ -127,6 +132,8 @@ def training(layer, epochs, loss, batch_size, learning_rate):
     scaler = Scaler(method="z_score")
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
+
+
 
     train_losses, val_losses, train_accuracies, val_accuracies, W, b = train_network(X_train, y_train, X_test, y_test)
     plot_learning_curves(train_losses, val_losses, train_accuracies, val_accuracies)
