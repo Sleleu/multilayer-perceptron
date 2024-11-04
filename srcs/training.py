@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-from activation import sigmoid, softmax
 from loss import sparse_categorical_cross_entropy
 from display import plot_learning_curves
+from activation import Activation
+from Scaler import Scaler
 
 def compute_mean_std(X):
     mean = np.mean(X, axis=0)
@@ -26,11 +27,11 @@ def feed_forward(X, W, b):
 
     for i in range(len(W) - 1):
         z = np.dot(a, W[i]) + b[i]
-        a = sigmoid(z)
+        a = Activation.sigmoid(z)
         A.append(a)
 
     z = np.dot(a, W[-1]) + b[-1]
-    output = softmax(z)
+    output = Activation.softmax(z)
     return output, A
 
 def back_propagate(X, y, output, A, W):
@@ -123,17 +124,9 @@ def training(layer, epochs, loss, batch_size, learning_rate):
     print(f"x_train shape : {X_train.shape}")
     print(f"x_valid shape : {X_test.shape}")
 
-    # Z_SCORE
-    mean_train, std_train = compute_mean_std(X_train)
-    X_train = z_score_normalize(X_train, mean_train, std_train)
-    X_test = z_score_normalize(X_test, mean_train, std_train)
-
-    # MINMAX
-    # X_min_train, X_max_train = compute_min_max(X_train)
-    # X_train = min_max_normalize(X_train, X_min_train, X_max_train)
-    # X_test = min_max_normalize(X_test, X_min_train, X_max_train)
-
-    #X_train, X_val, y_train, y_val = train_test_split(X_scaled, y_train, test_size=0.2, random_state=42)
+    scaler = Scaler(method="z_score")
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
 
     train_losses, val_losses, train_accuracies, val_accuracies, W, b = train_network(X_train, y_train, X_test, y_test)
     plot_learning_curves(train_losses, val_losses, train_accuracies, val_accuracies)
