@@ -108,13 +108,12 @@ def train_network(X_train, y_train, X_test, y_test, learning_rate=0.0314, batch_
         train_accuracies.append(train_accuracy)
         val_accuracies.append(val_accuracy)
         
-        print(f"epoch {epoch+1}/{epochs} - loss: {train_loss:.4f} - val_loss: {val_loss:.4f} "
+        print(f"epoch {epoch+1}/{epochs} - loss: {train_loss:.4f} - val_loss: {val_loss:.4f} - "
               f"acc: {train_accuracy:.4f} - val_acc: {val_accuracy:.4f}")
     
     return train_losses, val_losses, train_accuracies, val_accuracies, W, b
 
-
-if __name__ == "__main__":
+def training(layer, epochs, loss, batch_size, learning_rate):
     X_train = pd.read_csv('data/X_train.csv', header=None)
     y_train = pd.read_csv('data/y_train.csv', header=None).values.ravel()
 
