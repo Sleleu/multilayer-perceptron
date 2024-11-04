@@ -7,6 +7,10 @@ def log_loss(y_train, A_last):
     loss = - 1 / m * np.sum(y_train * np.log(A_last + epsilon) + (1 - y_train) * np.log(1 - A_last + epsilon))
     return loss
 
+def sparse_categorical_cross_entropy(y_true, y_pred):
+    m = y_true.shape[0]
+    y_pred = np.clip(y_pred, 1e-15, 1 - 1e-15)
+    return -np.sum(np.log(y_pred[np.arange(m), y_true])) / m
 
 # ---- TESTS ---- #
 

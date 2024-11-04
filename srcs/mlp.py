@@ -1,7 +1,7 @@
 #!/bin/python3
 
 from split_dataset import split_dataset
-from training import training
+from training import train_network
 import argparse
 
 
@@ -33,4 +33,4 @@ if __name__ == "__main__":
     if args.action == "split":
         split_dataset(args.dataset)
     elif args.action == "train":
-        training(args.dataset)
+        train_network(args.dataset)
