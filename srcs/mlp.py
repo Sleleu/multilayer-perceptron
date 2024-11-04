@@ -5,10 +5,39 @@ from training import training
 import argparse
 
 
+def validate_positive_int(value):
+    try:
+        ivalue = int(value)
+        if ivalue <= 0:
+            raise argparse.ArgumentTypeError(f"{value} must be a positive integer greater than 0")
+        return ivalue
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{value} must be a valid integer")
+
+def validate_layers(value_list):
+    if len(value_list) < 2:
+        raise argparse.ArgumentTypeError("At least 2 layers must be specified")
+    try:
+        int_list = [int(x) for x in value_list]
+        if any(x <= 0 for x in int_list):
+            raise argparse.ArgumentTypeError("All layer sizes must be positive integers")
+        return int_list
+    except ValueError:
+        raise argparse.ArgumentTypeError("All layer values must be valid integers")
+
+def validate_positive_float(value):
+    try:
+        fvalue = float(value)
+        if fvalue <= 0:
+            raise argparse.ArgumentTypeError(f"{value} must be a positive number greater than 0")
+        return fvalue
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{value} must be a valid number")
+
 def parse_arguments():
-    desc = "Multilayer Perceptron (MLP) program for classification. \
-            It can split a dataset, train a neural network model, \
-            or make predictions."
+    desc = """Multilayer Perceptron (MLP) program for classification.
+            It can split a dataset, train a neural network model,
+            or make predictions."""
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("-a", "--action",
                         choices=['split', 'train', 'predict'],
@@ -19,30 +48,45 @@ def parse_arguments():
     parser.add_argument("-d", "--dataset", type=str,
                         required=False,
                         help="Path to the CSV file containing the data.")
-    parser.add_argument("-e", "--epochs", type=int, default=84,
+    parser.add_argument("-e", "--epochs", 
+                        type=validate_positive_int,
+                        default=84,
                         required=False,
-                        help="Number of epochs for training. Default: 84")
-    parser.add_argument("-l", "--layer", nargs='+', type=int, default=[24, 24],
+                        help="Number of epochs for training. Must be positive. Default: 84")
+    parser.add_argument("-l", "--layer",
+                        nargs='+',
+                        type=int,
+                        default=[24, 24, 24],
                         required=False,
-                        help="Number and density of layers in the network. Default: [24, 24]")
-    parser.add_argument("-b", "--batch_size", type=int, default=8,
+                        help="Number and density of layers in the network. Minimum 2 layers required. Default: [24, 24, 24]")
+    parser.add_argument("-b", "--batch_size",
+                        type=validate_positive_int,
+                        default=8,
                         required=False,
-                        help="Batch size for training. Default: 8")
-    parser.add_argument("-r", "--learning_rate", type=float, default=0.0314,
+                        help="Batch size for training. Must be positive. Default: 8")
+    parser.add_argument("-r", "--learning_rate",
+                        type=validate_positive_float,
+                        default=0.0314,
                         required=False,
-                        help="Learning rate for training. Default: 0.0314")
-    parser.add_argument("-o", "--loss", type=str,
+                        help="Learning rate for training. Must be positive. Default: 0.0314")
+    parser.add_argument("-o", "--loss",
+                        type=str,
                         choices=["binaryCrossentropy",
-                                 "categoricalCrossentropy",
-                                 "sparseCategoricalCrossentropy"],
+                                "categoricalCrossentropy",
+                                "sparseCategoricalCrossentropy"],
                         default="sparseCategoricalCrossentropy",
                         required=False,
                         help="Loss function to use. Default: 'sparseCategoricalCrossentropy'")
 
     args = parser.parse_args()
 
-    if args.action in ['split'] and not args.dataset:
+    if args.action == 'split' and not args.dataset:
         parser.error("-d | --dataset <dataset name> is required for 'split' action.")
+
+    try:
+        args.layer = validate_layers(args.layer)
+    except argparse.ArgumentTypeError as e:
+        parser.error(str(e))
 
     return args
 
