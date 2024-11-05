@@ -77,6 +77,11 @@ def parse_arguments():
                         default="sparseCategoricalCrossentropy",
                         required=False,
                         help="Loss function to use. Default: 'sparseCategoricalCrossentropy'")
+    parser.add_argument("-s", "--seed", 
+                        type=validate_positive_int,
+                        default=None,
+                        required=False,
+                        help="Generate a random seed to track results. Default: None")
 
     args = parser.parse_args()
 
@@ -96,4 +101,4 @@ if __name__ == "__main__":
     if args.action == "split":
         split_dataset(args.dataset)
     elif args.action == "train":
-        training(args.layer, args.epochs, args.loss, args.batch_size, args.learning_rate)
+        training(args.layer, args.epochs, args.loss, args.batch_size, args.learning_rate, args.seed)

@@ -4,6 +4,7 @@ from loss import sparse_categorical_cross_entropy
 from display import plot_learning_curves
 from activation import Activation
 from Scaler import Scaler
+from WeightInitialiser import WeightInitialiser
 
 class MLP:
     def __init__(
@@ -16,6 +17,8 @@ class MLP:
             learning_rate=0.0314,
             epochs=84,
             batch_size=8,
+            weight_initializer="HeUniform",
+            random_seed=None,
             ):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.output_layer_size = output_layer_size
@@ -25,6 +28,8 @@ class MLP:
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.batch_size = batch_size
+        self.weight_initializer = weight_initializer
+        self.random_seed = random_seed
         
         self.train_losses, self.val_losses = [], []
         self.train_accuracies, self.val_accuracies = [], []
@@ -108,9 +113,18 @@ class MLP:
             input_size = layer_sizes[i]
             output_size = layer_sizes[i + 1]
             
-            # HE UNIFORM
-            weight = np.random.randn(input_size, output_size) * np.sqrt(2. / input_size)
-            biase = np.zeros((1, output_size))
+            # Random seed, None if not defined
+            np.random.seed(self.random_seed)
+
+            # Weight initialisation
+            match (self.weight_initializer):
+                case "HeUniform":
+                    weight, biase = WeightInitialiser.he_uniform(input_size, output_size)
+                case "Xavier": # à faire
+                    weight, biase = WeightInitialiser.xavier(input_size, output_size)
+                case _:
+                    print("Error while initialise weights")
+                    exit(1)
             
             W.append(weight)
             b.append(biase)
@@ -158,7 +172,7 @@ class MLP:
             print(f"epoch {epoch+1}/{self.epochs} - loss: {train_loss:.4f} - val_loss: {val_loss:.4f} - "
                 f"acc: {train_accuracy:.4f} - val_acc: {val_accuracy:.4f}")
 
-def training(layer, epochs, loss, batch_size, learning_rate):
+def training(layer, epochs, loss, batch_size, learning_rate, seed):
     X_train = pd.read_csv('data/X_train.csv', header=None)
     y_train = pd.read_csv('data/y_train.csv', header=None).values.ravel()
 
@@ -176,7 +190,8 @@ def training(layer, epochs, loss, batch_size, learning_rate):
                 epochs=epochs,
                 loss=loss,
                 batch_size=batch_size,
-                learning_rate=learning_rate)
+                learning_rate=learning_rate,
+                random_seed=seed)
     model.fit(X_train, y_train, X_test, y_test)
-    print(model)
+    #print(model)
     plot_learning_curves(model.train_losses, model.val_losses, model.train_accuracies, model.val_accuracies)
