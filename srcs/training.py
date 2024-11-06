@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from loss import sparse_categorical_cross_entropy
 from display import plot_learning_curves
-from activation import Activation
+from Activation import Activation
 from Scaler import Scaler
 from WeightInitialiser import WeightInitialiser
 
