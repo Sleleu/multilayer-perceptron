@@ -1,5 +1,5 @@
-from split_dataset import split_dataset
-from training import training
+from srcs.split_dataset import split_dataset
+from srcs.training import training
 import argparse
 
 

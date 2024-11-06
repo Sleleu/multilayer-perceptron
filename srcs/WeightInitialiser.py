@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 class WeightInitialiser:
     @staticmethod
     def he_normal(input_size, output_size):
-        weight = np.random.randn(input_size, output_size) * np.sqrt(2. / input_size)
+        weight = np.random.randn(input_size, output_size) * np.sqrt(2 / input_size)
         return weight
 
     @staticmethod

@@ -1,5 +1,5 @@
 import numpy as np
-from utils import GREEN, END
+from srcs.utils import GREEN, END
 
 class Loss:
 

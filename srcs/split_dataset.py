@@ -1,4 +1,4 @@
-from utils import load, YELLOW, END
+from srcs.utils import load, YELLOW, END
 import pandas as pd
 
 def split_features(df: pd.DataFrame, split_value: int)-> tuple[pd.DataFrame]:
