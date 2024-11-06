@@ -53,7 +53,8 @@ class MLP:
             'Loss Function': self.loss,
             'Learning Rate': self.learning_rate,
             'Epochs': self.epochs,
-            'Batch Size': self.batch_size
+            'Batch Size': self.batch_size,
+            'Seed': self.random_seed,
         }
         for name, value in main_attrs.items():
             output.append(f"{name:15}: {value}")
@@ -109,19 +110,25 @@ class MLP:
         W = []
         b = []
         
+        # Random seed, None if not defined
+        np.random.seed(self.random_seed)
+        
         for i in range(len(layer_sizes) - 1):
             input_size = layer_sizes[i]
             output_size = layer_sizes[i + 1]
-            
-            # Random seed, None if not defined
-            np.random.seed(self.random_seed)
+
+            biase = np.zeros((1, output_size))
 
             # Weight initialisation
             match (self.weight_initializer):
+                case "HeNormal":
+                    weight = WeightInitialiser.he_normal(input_size, output_size)
                 case "HeUniform":
-                    weight, biase = WeightInitialiser.he_uniform(input_size, output_size)
-                case "Xavier": # à faire
-                    weight, biase = WeightInitialiser.xavier(input_size, output_size)
+                    weight = WeightInitialiser.he_uniform(input_size, output_size)
+                case "GlorotNormal":
+                    weight = WeightInitialiser.glorot_normal(input_size, output_size)
+                case "GlorotUniform":
+                    weight = WeightInitialiser.glorot_uniform(input_size, output_size)
                 case _:
                     print("Error while initialise weights")
                     exit(1)
@@ -171,8 +178,9 @@ class MLP:
             
             print(f"epoch {epoch+1}/{self.epochs} - loss: {train_loss:.4f} - val_loss: {val_loss:.4f} - "
                 f"acc: {train_accuracy:.4f} - val_acc: {val_accuracy:.4f}")
+    
 
-def training(layer, epochs, loss, batch_size, learning_rate, seed):
+def training(layer, epochs, loss, batch_size, learning_rate, seed, standardize, weight_initializer):
     X_train = pd.read_csv('data/X_train.csv', header=None)
     y_train = pd.read_csv('data/y_train.csv', header=None).values.ravel()
 
@@ -182,7 +190,7 @@ def training(layer, epochs, loss, batch_size, learning_rate, seed):
     print(f"x_train shape : {X_train.shape}")
     print(f"x_valid shape : {X_test.shape}")
 
-    scaler = Scaler(method="z_score")
+    scaler = Scaler(method=standardize)
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
@@ -191,7 +199,8 @@ def training(layer, epochs, loss, batch_size, learning_rate, seed):
                 loss=loss,
                 batch_size=batch_size,
                 learning_rate=learning_rate,
-                random_seed=seed)
+                random_seed=seed,
+                weight_initializer=weight_initializer)
     model.fit(X_train, y_train, X_test, y_test)
-    #print(model)
+    print(model)
     plot_learning_curves(model.train_losses, model.val_losses, model.train_accuracies, model.val_accuracies)

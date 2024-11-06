@@ -1,5 +1,3 @@
-#!/bin/python3
-
 from split_dataset import split_dataset
 from training import training
 import argparse
@@ -82,6 +80,16 @@ def parse_arguments():
                         default=None,
                         required=False,
                         help="Generate a random seed to track results. Default: None")
+    parser.add_argument("-w", "--weight_initializer", type=str,
+                        required=False,
+                        default="HeUniform",
+                        choices=["HeNormal", "HeUniform", "GlorotNormal", "GlorotUniform"],
+                        help="Choose which weight initialisation method will be used for training. Default: 'HeUniform'")
+    parser.add_argument("--standardize", type=str,
+                        required=False,
+                        default="z_score",
+                        choices=["z_score", "minmax"],
+                        help="Choose which standardization method will be used for training. Default: 'z_score'")
 
     args = parser.parse_args()
 
@@ -101,4 +109,11 @@ if __name__ == "__main__":
     if args.action == "split":
         split_dataset(args.dataset)
     elif args.action == "train":
-        training(args.layer, args.epochs, args.loss, args.batch_size, args.learning_rate, args.seed)
+        training(layer=args.layer, 
+                 epochs=args.epochs, 
+                 loss=args.loss, 
+                 batch_size=args.batch_size, 
+                 learning_rate=args.learning_rate, 
+                 seed=args.seed,
+                 standardize=args.standardize,
+                 weight_initializer=args.weight_initializer)
