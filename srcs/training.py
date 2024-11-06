@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from loss import sparse_categorical_cross_entropy
+from Loss import Loss
 from display import plot_learning_curves
 from Activation import Activation
 from Scaler import Scaler
@@ -165,8 +165,8 @@ class MLP:
             train_output, _ = self.feed_forward(X_train, W, b)
             val_output, _ = self.feed_forward(X_test, W, b)
             
-            train_loss = sparse_categorical_cross_entropy(y_train, train_output)
-            val_loss = sparse_categorical_cross_entropy(y_test, val_output)
+            train_loss = Loss.sparse_categorical_cross_entropy(y_train, train_output)
+            val_loss = Loss.sparse_categorical_cross_entropy(y_test, val_output)
             
             train_accuracy = self.get_accuracy(X_train, y_train, W, b)
             val_accuracy = self.get_accuracy(X_test, y_test, W, b)
