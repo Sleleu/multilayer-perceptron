@@ -99,6 +99,16 @@ def parse_arguments():
                         required=False,
                         default=5,
                         help="Number of epochs to wait before early stopping. Default: 5")
+    parser.add_argument("--activation", type=str,
+                        required=False,
+                        default='sigmoid',
+                        choices=["sigmoid", "relu", "leakyrelu", "tanh"],
+                        help="Choose the activation function for hidden layers. Default: 'sigmoid'")
+    parser.add_argument("--output_activation", type=str,
+                        required=False,
+                        default='softmax',
+                        choices=["sigmoid", "softmax"],
+                        help="Choose the activation function for output layer. Default: 'softmax'")
 
     args = parser.parse_args()
 
@@ -127,4 +137,6 @@ if __name__ == "__main__":
                  standardize=args.standardize,
                  weight_initializer=args.weight_initializer,
                  solver=args.solver,
-                 patience=args.patience)
+                 patience=args.patience,
+                 activation=args.activation,
+                 output_activation=args.output_activation)

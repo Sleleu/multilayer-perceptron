@@ -8,14 +8,12 @@ from srcs.EarlyStopping import EarlyStopping
 class MLP:
     def __init__(
             self, hidden_layer_sizes=[24, 24, 24], output_layer_size=2,
-            activation="sigmoid", output_function="softmax", loss="sparseCategoricalCrossentropy",
+            activation="sigmoid", output_activation="softmax", loss="sparseCategoricalCrossentropy",
             learning_rate=0.0314, epochs=84, batch_size=8, weight_initializer="HeUniform", 
             random_seed=None, solver='sgd',
             ):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.output_layer_size = output_layer_size
-        self.activation = activation
-        self.output_function = output_function
         self.loss = loss
         self.learning_rate = learning_rate
         self.epochs = epochs
@@ -26,14 +24,42 @@ class MLP:
         self.train_losses, self.val_losses = [], []
         self.train_accuracies, self.val_accuracies = [], []
         
+        # Select solver
         match (solver):
             case "sgd":
                 self.solver = Sgd(self.learning_rate)
             case "adam":
                 self.solver = Adam(self.learning_rate)
             case _:
-                print('MLP Error: Unknow solver selected. Choices: ["sgd", "adam"]')
+                print(f"Error: Unknow solver '{solver}'."
+                      'Available choices: ["sgd", "adam"]')
                 exit(1)
+                
+        # Select activation
+        self.activation_functions: dict[str, tuple[function, function]] = {
+            "sigmoid": (Activation.sigmoid, Activation.sigmoid_derivative),
+            "relu": (Activation.relu, Activation.relu_derivative),
+            "leakyrelu": (Activation.leaky_relu, Activation.leaky_relu_derivative),
+            "tanh": (Activation.tanh, Activation.tanh_derivative)
+        }
+        if activation not in self.activation_functions:
+            print(f"Error: Unknown activation function '{activation}'. "
+                  f"Available choices: {list(self.activation_functions.keys())}")
+            exit(1)
+        self.activation, self.activation_derivative = self.activation_functions[activation]
+        self.activation_name = activation
+        
+        # Select output activation
+        self.output_activations: dict[str, function] = {
+            "softmax": Activation.softmax,
+            "sigmoid": Activation.sigmoid
+        }
+        if output_activation not in self.output_activations:
+            print(f"Error: Unknown output activation '{output_activation}'. "
+                  f"Available choices: {list(self.output_activation.keys())}")
+            exit(1)
+        self.output_activation = self.output_activations[output_activation]
+        self.output_activation_name = output_activation
         
     def __str__(self):
         separator = "-" * 50
@@ -49,8 +75,8 @@ class MLP:
         
         main_attrs = {
             'Architecture': ' → '.join(architecture),
-            'Activation': self.activation,
-            'Output Function': self.output_function,
+            'Activation': self.activation_name,
+            'Output Activation': self.output_activation_name,
             'Loss Function': self.loss,
             'Learning Rate': self.learning_rate,
             'Epochs': self.epochs,
@@ -59,7 +85,7 @@ class MLP:
             'Solver': self.solver.name,
         }
         for name, value in main_attrs.items():
-            output.append(f"{name:15}: {value}")
+            output.append(f"{name:18}: {value}")
         
         if self.train_losses:
             output.extend([
@@ -81,11 +107,11 @@ class MLP:
 
         for i in range(len(W) - 1):
             z = np.dot(a, W[i]) + b[i]
-            a = Activation.sigmoid(z)
+            a = self.activation(z)
             A.append(a)
 
         z = np.dot(a, W[-1]) + b[-1]
-        output = Activation.softmax(z)
+        output = self.output_activation(z)
         return output, A
 
     def back_propagate(self, X, y, output, A, W):
@@ -104,7 +130,7 @@ class MLP:
 
             if i > 0:
                 da = np.dot(dz, W[i].T)
-                dz = da * (A[i - 1] * (1 - A[i - 1]))
+                dz = da * self.activation_derivative(A[i - 1])
         
         return dW, db
 

@@ -6,7 +6,8 @@ from srcs.EarlyStopping import EarlyStopping
     
 def training(layer, epochs, loss, batch_size, 
              learning_rate, seed, standardize, 
-             weight_initializer, solver, patience):
+             weight_initializer, solver, patience,
+             activation, output_activation):
     X_train = pd.read_csv('data/X_train.csv', header=None)
     y_train = pd.read_csv('data/y_train.csv', header=None).values.ravel()
 
@@ -23,6 +24,8 @@ def training(layer, epochs, loss, batch_size,
     early_stopping = EarlyStopping(patience=patience)
 
     model = MLP(hidden_layer_sizes=layer,
+                activation=activation,
+                output_activation=output_activation,
                 epochs=epochs,
                 loss=loss,
                 batch_size=batch_size,
@@ -31,4 +34,5 @@ def training(layer, epochs, loss, batch_size,
                 weight_initializer=weight_initializer,
                 solver=solver)
     model.fit(X_train, y_train, X_test, y_test, early_stopping)
+    print(model)
     plot_learning_curves(model.train_losses, model.val_losses, model.train_accuracies, model.val_accuracies)
