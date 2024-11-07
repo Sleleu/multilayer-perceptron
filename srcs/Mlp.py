@@ -1,9 +1,8 @@
 import numpy as np
-from srcs.Loss import Loss
-from srcs.Activation import Activation
 from srcs.WeightInitialiser import WeightInitialiser
 from srcs.optimizer import Sgd, Adam
 from srcs.EarlyStopping import EarlyStopping
+from srcs.constants import ACTIVATIONS_FUNCTIONS, OUTPUT_ACTIVATIONS, LOSS_FUNCTIONS
 
 class MLP:
     def __init__(
@@ -14,7 +13,6 @@ class MLP:
             ):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.output_layer_size = output_layer_size
-        self.loss = loss
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.batch_size = batch_size
@@ -36,30 +34,28 @@ class MLP:
                 exit(1)
                 
         # Select activation
-        self.activation_functions: dict[str, tuple[function, function]] = {
-            "sigmoid": (Activation.sigmoid, Activation.sigmoid_derivative),
-            "relu": (Activation.relu, Activation.relu_derivative),
-            "leakyrelu": (Activation.leaky_relu, Activation.leaky_relu_derivative),
-            "tanh": (Activation.tanh, Activation.tanh_derivative)
-        }
-        if activation not in self.activation_functions:
+        if activation not in ACTIVATIONS_FUNCTIONS:
             print(f"Error: Unknown activation function '{activation}'. "
-                  f"Available choices: {list(self.activation_functions.keys())}")
+                  f"Available choices: {list(ACTIVATIONS_FUNCTIONS.keys())}")
             exit(1)
-        self.activation, self.activation_derivative = self.activation_functions[activation]
+        self.activation, self.activation_derivative = ACTIVATIONS_FUNCTIONS[activation]
         self.activation_name = activation
         
         # Select output activation
-        self.output_activations: dict[str, function] = {
-            "softmax": Activation.softmax,
-            "sigmoid": Activation.sigmoid
-        }
-        if output_activation not in self.output_activations:
+        if output_activation not in OUTPUT_ACTIVATIONS:
             print(f"Error: Unknown output activation '{output_activation}'. "
-                  f"Available choices: {list(self.output_activation.keys())}")
+                  f"Available choices: {list(OUTPUT_ACTIVATIONS.keys())}")
             exit(1)
-        self.output_activation = self.output_activations[output_activation]
+        self.output_activation = OUTPUT_ACTIVATIONS[output_activation]
         self.output_activation_name = output_activation
+
+        # Select loss function
+        if loss not in LOSS_FUNCTIONS:
+            print(f"Error: Unknow loss function '{loss}'."
+                  f"Available choices: {list(LOSS_FUNCTIONS.keys())}")
+            exit(1)
+        self.loss = LOSS_FUNCTIONS[loss]
+        self.loss_name = loss
         
     def __str__(self):
         separator = "-" * 50
@@ -192,9 +188,11 @@ class MLP:
             train_output, _ = self.feed_forward(X_train, W, b)
             val_output, _ = self.feed_forward(X_test, W, b)
             
-            train_loss = Loss.sparse_categorical_cross_entropy(y_train, train_output)
-            val_loss = Loss.sparse_categorical_cross_entropy(y_test, val_output)
-            
+            try:
+                train_loss = self.loss(y_train, train_output)
+                val_loss = self.loss(y_test, val_output)
+            except:
+                raise ValueError("Invalid loss function for this training model")
             train_accuracy = self.get_accuracy(X_train, y_train, W, b)
             val_accuracy = self.get_accuracy(X_test, y_test, W, b)
             

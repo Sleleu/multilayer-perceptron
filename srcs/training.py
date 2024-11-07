@@ -1,4 +1,5 @@
 import pandas as pd
+from srcs.utils import YELLOW, END
 from srcs.Mlp import MLP
 from srcs.Scaler import Scaler
 from srcs.display import plot_learning_curves
@@ -33,6 +34,10 @@ def training(layer, epochs, loss, batch_size,
                 random_seed=seed,
                 weight_initializer=weight_initializer,
                 solver=solver)
-    model.fit(X_train, y_train, X_test, y_test, early_stopping)
+    try:
+        model.fit(X_train, y_train, X_test, y_test, early_stopping)
+    except ValueError as error:
+        print(f"{YELLOW}{__name__}: {type(error).__name__}: {error}{END}")
+        exit(1)
     print(model)
     plot_learning_curves(model.train_losses, model.val_losses, model.train_accuracies, model.val_accuracies)
