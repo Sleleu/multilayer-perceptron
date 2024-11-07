@@ -90,6 +90,15 @@ def parse_arguments():
                         default="z_score",
                         choices=["z_score", "minmax"],
                         help="Choose which standardization method will be used for training. Default: 'z_score'")
+    parser.add_argument("--solver", type=str,
+                        required=False,
+                        default="sgd",
+                        choices=["sgd", "adam"],
+                        help="Choose wich solver will be used for training. Default: 'sgd'")
+    parser.add_argument("-p", "--patience", type=validate_positive_int,
+                        required=False,
+                        default=5,
+                        help="Number of epochs to wait before early stopping. Default: 5")
 
     args = parser.parse_args()
 
@@ -116,4 +125,6 @@ if __name__ == "__main__":
                  learning_rate=args.learning_rate, 
                  seed=args.seed,
                  standardize=args.standardize,
-                 weight_initializer=args.weight_initializer)
+                 weight_initializer=args.weight_initializer,
+                 solver=args.solver,
+                 patience=args.patience)

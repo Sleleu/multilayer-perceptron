@@ -2,20 +2,15 @@ import numpy as np
 from srcs.Loss import Loss
 from srcs.Activation import Activation
 from srcs.WeightInitialiser import WeightInitialiser
+from srcs.optimizer import Sgd, Adam
+from srcs.EarlyStopping import EarlyStopping
 
 class MLP:
     def __init__(
-            self,
-            hidden_layer_sizes=[24, 24, 24],
-            output_layer_size=2,
-            activation="sigmoid",
-            output_function="softmax",
-            loss="sparseCategoricalCrossentropy",
-            learning_rate=0.0314,
-            epochs=84,
-            batch_size=8,
-            weight_initializer="HeUniform",
-            random_seed=None,
+            self, hidden_layer_sizes=[24, 24, 24], output_layer_size=2,
+            activation="sigmoid", output_function="softmax", loss="sparseCategoricalCrossentropy",
+            learning_rate=0.0314, epochs=84, batch_size=8, weight_initializer="HeUniform", 
+            random_seed=None, solver='sgd',
             ):
         self.hidden_layer_sizes = hidden_layer_sizes
         self.output_layer_size = output_layer_size
@@ -30,6 +25,15 @@ class MLP:
         
         self.train_losses, self.val_losses = [], []
         self.train_accuracies, self.val_accuracies = [], []
+        
+        match (solver):
+            case "sgd":
+                self.solver = Sgd(self.learning_rate)
+            case "adam":
+                self.solver = Adam(self.learning_rate)
+            case _:
+                print('MLP Error: Unknow solver selected. Choices: ["sgd", "adam"]')
+                exit(1)
         
     def __str__(self):
         separator = "-" * 50
@@ -52,6 +56,7 @@ class MLP:
             'Epochs': self.epochs,
             'Batch Size': self.batch_size,
             'Seed': self.random_seed,
+            'Solver': self.solver.name,
         }
         for name, value in main_attrs.items():
             output.append(f"{name:15}: {value}")
@@ -135,21 +140,20 @@ class MLP:
         
         return W, b
 
-    def update_weights(self, W, b, dW, db):
-        for c in range(len(W)):
-            W[c] -= self.learning_rate * dW[c]
-            b[c] -= self.learning_rate * db[c]
-        return W, b
-
     def get_accuracy(self, X, y, W, b):
         output, _ = self.feed_forward(X, W, b)
         predictions = np.argmax(output, axis=1)
         return np.mean(predictions == y)
 
-    def fit(self, X_train, y_train, X_test, y_test):
+    def fit(self, X_train, y_train, X_test = None, y_test = None, # to work : can use fit without val for modularity
+            early_stopping: EarlyStopping = None):
         self.input_layer_size = X_train.shape[1]
         layer_sizes = [self.input_layer_size] + self.hidden_layer_sizes + [self.output_layer_size]
         W, b = self.init_network(layer_sizes)
+        
+        best_W, best_b = None, None
+        best_epoch = 0
+        
         for epoch in range(self.epochs):
             for i in range(0, len(X_train), self.batch_size):
                 batch_X = X_train[i:i+self.batch_size]
@@ -157,7 +161,7 @@ class MLP:
                 
                 output, A = self.feed_forward(batch_X, W, b)
                 dW, db = self.back_propagate(batch_X, batch_y, output, A, W)
-                W, b = self.update_weights(W, b, dW, db)
+                W, b = self.solver.update(W, b, dW, db)
 
             train_output, _ = self.feed_forward(X_train, W, b)
             val_output, _ = self.feed_forward(X_test, W, b)
@@ -175,3 +179,14 @@ class MLP:
             
             print(f"epoch {epoch+1}/{self.epochs} - loss: {train_loss:.4f} - val_loss: {val_loss:.4f} - "
                 f"acc: {train_accuracy:.4f} - val_acc: {val_accuracy:.4f}")
+            
+            if early_stopping is not None:
+                early_stopping.check_loss(val_loss)
+                if early_stopping.counter == 0:
+                    best_W = [w.copy() for w in W]
+                    best_b = [b.copy() for b in b]
+                    best_epoch = epoch
+                if early_stopping.early_stop:
+                    print(f"Early stopping triggered. Best epoch was {best_epoch + 1}")
+                    W, b = best_W, best_b
+                    break
