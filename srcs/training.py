@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from srcs.utils import YELLOW, END
+from srcs.utils import YELLOW, GREEN, CYAN, END
 from srcs.Mlp import MLP
 from srcs.Scaler import Scaler
 from srcs.display import plot_learning_curves
@@ -17,7 +17,7 @@ def save_model(model, W, b, filepath='saved_model.npy'):
         'b': b
     }
     np.save(filepath, model_data)
-    print(f"Saving model '{filepath}' to disk...")
+    print(f"{GREEN}Saving model {CYAN}'{filepath}' to disk...{END}")
 
 def training(layer, epochs, loss, batch_size, 
              learning_rate, seed, standardize, 
@@ -26,15 +26,16 @@ def training(layer, epochs, loss, batch_size,
     X_train = pd.read_csv('data/processed/train/X_train.csv', header=None)
     y_train = pd.read_csv('data/processed/train/y_train.csv', header=None).values.ravel()
 
-    X_test = pd.read_csv("data/processed/val/X_val.csv", header=None)
-    y_test = pd.read_csv("data/processed/val/y_val.csv", header=None).values.ravel()
+    X_val = pd.read_csv("data/processed/val/X_val.csv", header=None)
+    y_val = pd.read_csv("data/processed/val/y_val.csv", header=None).values.ravel()
 
-    print(f"x_train shape : {X_train.shape}")
-    print(f"x_valid shape : {X_test.shape}")
+    print(f"{GREEN}x_train shape: {YELLOW}{X_train.shape}")
+    print(f"{GREEN}x_val shape: {YELLOW}{X_val.shape}")
+    print(f"\n\t{GREEN}TRAINING PHASE:{END}")
 
     scaler = Scaler(method=standardize)
     X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    X_val = scaler.transform(X_val)
     
     scaler_params = {
         'method': standardize,
@@ -58,7 +59,7 @@ def training(layer, epochs, loss, batch_size,
                 weight_initializer=weight_initializer,
                 solver=solver)
     try:
-        best_W, best_b = model.fit(X_train, y_train, X_test, y_test, early_stopping)
+        best_W, best_b = model.fit(X_train, y_train, X_val, y_val, early_stopping)
         save_model(model, best_W, best_b)
     except ValueError as error:
         print(f"{YELLOW}{__name__}: {type(error).__name__}: {error}{END}")

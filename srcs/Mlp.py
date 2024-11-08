@@ -3,6 +3,7 @@ from srcs.WeightInitialiser import WeightInitialiser
 from srcs.optimizer import Sgd, Adam
 from srcs.EarlyStopping import EarlyStopping
 from srcs.constants import ACTIVATIONS_FUNCTIONS, OUTPUT_ACTIVATIONS, LOSS_FUNCTIONS
+from srcs.utils import GREEN, YELLOW, CYAN, MAGENTA, END
 
 class MLP:
     def __init__(
@@ -29,37 +30,37 @@ class MLP:
             case "adam":
                 self.solver = Adam(self.learning_rate)
             case _:
-                print(f"Error: Unknow solver '{solver}'."
-                      'Available choices: ["sgd", "adam"]')
+                print(f"{YELLOW}Error: Unknow solver '{solver}'."
+                      f'Available choices: ["sgd", "adam"]{END}')
                 exit(1)
                 
         # Select activation
         if activation not in ACTIVATIONS_FUNCTIONS:
-            print(f"Error: Unknown activation function '{activation}'. "
-                  f"Available choices: {list(ACTIVATIONS_FUNCTIONS.keys())}")
+            print(f"{YELLOW}Error: Unknown activation function '{activation}'.\n"
+                  f"Available choices: {list(ACTIVATIONS_FUNCTIONS.keys())}{END}")
             exit(1)
         self.activation, self.activation_derivative = ACTIVATIONS_FUNCTIONS[activation]
         self.activation_name = activation
         
         # Select output activation
         if output_activation not in OUTPUT_ACTIVATIONS:
-            print(f"Error: Unknown output activation '{output_activation}'. "
-                  f"Available choices: {list(OUTPUT_ACTIVATIONS.keys())}")
+            print(f"{YELLOW}Error: Unknown output activation '{output_activation}'.\n"
+                  f"Available choices: {list(OUTPUT_ACTIVATIONS.keys())}{END}")
             exit(1)
         self.output_activation = OUTPUT_ACTIVATIONS[output_activation]
         self.output_activation_name = output_activation
 
         # Select loss function
         if loss not in LOSS_FUNCTIONS:
-            print(f"Error: Unknow loss function '{loss}'."
-                  f"Available choices: {list(LOSS_FUNCTIONS.keys())}")
+            print(f"{YELLOW}Error: Unknow loss function '{loss}'.\n"
+                  f"Available choices: {list(LOSS_FUNCTIONS.keys())}{END}")
             exit(1)
         self.loss = LOSS_FUNCTIONS[loss]
         self.loss_name = loss
         
     def __str__(self):
-        separator = "-" * 50
-        output = ["\n\tMODEL CONFIGURATION:", separator]
+        separator = f"{CYAN}═{END}" * 50
+        output = [f"\n\t{GREEN}MODEL CONFIGURATION:{END}", separator]
         
         architecture = []
         if hasattr(self, 'input_layer_size'):
@@ -70,7 +71,7 @@ class MLP:
         architecture.append(str(self.output_layer_size))
         
         main_attrs = {
-            'Architecture': ' → '.join(architecture),
+            'Architecture': f'{YELLOW} → {CYAN}'.join(architecture),
             'Activation': self.activation_name,
             'Output Activation': self.output_activation_name,
             'Loss Function': self.loss_name,
@@ -81,18 +82,7 @@ class MLP:
             'Solver': self.solver.name,
         }
         for name, value in main_attrs.items():
-            output.append(f"{name:18}: {value}")
-        
-        if self.train_losses:
-            output.extend([
-                "",
-                "TRAINING METRICS:",
-                f"{'Train Loss':15}: first={self.train_losses[0]:.4f}, last={self.train_losses[-1]:.4f}",
-                f"{'Val Loss':15}: first={self.val_losses[0]:.4f}, last={self.val_losses[-1]:.4f}",
-                f"{'Train Accuracy':15}: first={self.train_accuracies[0]:.4f}, last={self.train_accuracies[-1]:.4f}",
-                f"{'Val Accuracy':15}: first={self.val_accuracies[0]:.4f}, last={self.val_accuracies[-1]:.4f}"
-            ])
-        
+            output.append(f"{GREEN}{name:18}: {CYAN}{value}{END}")
         output.append(separator)
         return "\n".join(output)
         
@@ -167,7 +157,7 @@ class MLP:
         predictions = np.argmax(output, axis=1)
         return np.mean(predictions == y)
 
-    def fit(self, X_train, y_train, X_test = None, y_test = None, # to work : can use fit without val for modularity
+    def fit(self, X_train, y_train, X_val = None, y_val = None, # to work : can use fit without val for modularity
             early_stopping: EarlyStopping = None):
         self.input_layer_size = X_train.shape[1]
         layer_sizes = [self.input_layer_size] + self.hidden_layer_sizes + [self.output_layer_size]
@@ -186,23 +176,26 @@ class MLP:
                 W, b = self.solver.update(W, b, dW, db)
 
             train_output, _ = self.feed_forward(X_train, W, b)
-            val_output, _ = self.feed_forward(X_test, W, b)
+            val_output, _ = self.feed_forward(X_val, W, b)
             
             try:
                 train_loss = self.loss(y_train, train_output)
-                val_loss = self.loss(y_test, val_output)
+                val_loss = self.loss(y_val, val_output)
             except:
                 raise ValueError("Invalid loss function for this training model")
             train_accuracy = self.get_accuracy(X_train, y_train, W, b)
-            val_accuracy = self.get_accuracy(X_test, y_test, W, b)
+            val_accuracy = self.get_accuracy(X_val, y_val, W, b)
             
             self.train_losses.append(train_loss)
             self.val_losses.append(val_loss)
             self.train_accuracies.append(train_accuracy)
             self.val_accuracies.append(val_accuracy)
             
-            print(f"epoch {epoch+1}/{self.epochs} - loss: {train_loss:.4f} - val_loss: {val_loss:.4f} - "
-                f"acc: {train_accuracy:.4f} - val_acc: {val_accuracy:.4f}")
+            print(f"{MAGENTA}epoch {CYAN}{epoch+1}/{self.epochs}"
+                  f"{GREEN} - {MAGENTA}loss: {CYAN}{train_loss:.4f}"
+                  f"{GREEN} - {MAGENTA}val_loss: {CYAN}{val_loss:.4f}"
+                  f"{GREEN} - {MAGENTA}acc: {CYAN}{train_accuracy:.4f}"
+                  f"{GREEN} - {MAGENTA}val_acc: {CYAN}{val_accuracy:.4f}{END}")
             
             if early_stopping is not None:
                 early_stopping.check_loss(val_loss)
@@ -211,7 +204,7 @@ class MLP:
                     best_b = [b.copy() for b in b]
                     best_epoch = epoch
                 if early_stopping.early_stop:
-                    print(f"Early stopping triggered. Best epoch was {best_epoch + 1}")
+                    print(f"{GREEN}Early stopping triggered. Best epoch was {YELLOW}{best_epoch + 1}{END}")
                     W, b = best_W, best_b
                     break
         return W, b
