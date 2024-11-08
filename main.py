@@ -1,5 +1,7 @@
 from srcs.split_dataset import split_dataset
 from srcs.training import training
+from srcs.predict import predict
+import numpy as np
 import argparse
 
 
@@ -109,12 +111,17 @@ def parse_arguments():
                         default='softmax',
                         choices=["sigmoid", "softmax"],
                         help="Choose the activation function for output layer. Default: 'softmax'")
+    parser.add_argument("-m", "--model", type=str,
+                        required=False,
+                        help="Path to saved model file for prediction")
 
     args = parser.parse_args()
 
     if args.action == 'split' and not args.dataset:
         parser.error("-d | --dataset <dataset name> is required for 'split' action.")
-
+    elif args.action == "predict":
+        if not args.model or not args.dataset:
+            parser.error("-d | --dataset <dataset name> AND -m | --model <model name> is required for 'predict' action.")
     try:
         args.layer = validate_layers(args.layer)
     except argparse.ArgumentTypeError as e:
@@ -140,3 +147,9 @@ if __name__ == "__main__":
                  patience=args.patience,
                  activation=args.activation,
                  output_activation=args.output_activation)
+    elif args.action == "predict":
+        try:
+            scaler_params = np.load('scaler_params.npy', allow_pickle=True).item()
+            predictions = predict(args.model, args.dataset, scaler_params)
+        except FileNotFoundError:
+            print("Error: Model file or scaler parameters not found")

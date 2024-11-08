@@ -3,6 +3,7 @@ import pandas as pd
 YELLOW = "\033[1;33m"
 CYAN = "\033[1;36m"
 GREEN = "\033[1;32m"
+MAGENTA = "\033[1;34m"
 END = "\033[0m"
 
 

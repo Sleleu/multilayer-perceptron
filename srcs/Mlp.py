@@ -214,3 +214,4 @@ class MLP:
                     print(f"Early stopping triggered. Best epoch was {best_epoch + 1}")
                     W, b = best_W, best_b
                     break
+        return W, b
