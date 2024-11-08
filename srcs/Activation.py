@@ -5,6 +5,7 @@ class Activation:
 
     @staticmethod
     def sigmoid(Z):
+        Z = np.clip(Z, -500, 500)
         return 1 / (1 + np.exp(-Z))
 
     @staticmethod
