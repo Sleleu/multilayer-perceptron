@@ -73,7 +73,7 @@ class MLP:
             'Architecture': ' → '.join(architecture),
             'Activation': self.activation_name,
             'Output Activation': self.output_activation_name,
-            'Loss Function': self.loss,
+            'Loss Function': self.loss_name,
             'Learning Rate': self.learning_rate,
             'Epochs': self.epochs,
             'Batch Size': self.batch_size,

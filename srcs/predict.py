@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from srcs.Mlp import MLP
 from srcs.Scaler import Scaler
-from srcs.utils import GREEN, YELLOW, CYAN, MAGENTA, END
+from srcs.utils import GREEN, YELLOW, CYAN, MAGENTA, END, load
 
 def predict(model_path: str, data_path: str, scaler_params=None):
     m_data = np.load(model_path, allow_pickle=True).item()
@@ -68,4 +68,7 @@ def predict(model_path: str, data_path: str, scaler_params=None):
     print(results.head())
     print(f"{END}", end='')
     
+    # print(predictions)
+    # y_test = load("data/processed/test/y_test.csv", header=None).to_numpy().ravel().T
+    # print(y_test)
     return predicted_labels, probabilities

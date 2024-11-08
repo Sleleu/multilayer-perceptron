@@ -13,7 +13,7 @@ def load(path: str, header: str = "header") -> pd.DataFrame:
     try:
         df = pd.read_csv(path) if header is not None \
                                else pd.read_csv(path, header=None)
-        print(f"Loading dataset of dimensions {df.shape}")
+        print(f"{GREEN}Loading dataset of dimensions {YELLOW}{df.shape}{END}")
         return df
     except HANDLED_ERRORS as error:
         print(f"{YELLOW}{__name__}: {type(error).__name__}: {error}{END}")

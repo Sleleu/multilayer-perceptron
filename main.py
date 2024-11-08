@@ -1,6 +1,7 @@
 from srcs.split_dataset import split_dataset
 from srcs.training import training
 from srcs.predict import predict
+from srcs.utils import YELLOW, END
 import numpy as np
 import argparse
 
@@ -133,7 +134,11 @@ def parse_arguments():
 if __name__ == "__main__":
     args = parse_arguments()
     if args.action == "split":
-        split_dataset(args.dataset)
+        try:
+            split_dataset(args.dataset)
+        except Exception as error:
+            print(f"{YELLOW}{__name__}: {type(error).__name__}: {error}{END}")
+            exit(1)
     elif args.action == "train":
         training(layer=args.layer, 
                  epochs=args.epochs, 
