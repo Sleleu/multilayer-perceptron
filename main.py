@@ -96,7 +96,7 @@ def parse_arguments():
     parser.add_argument("--solver", type=str,
                         required=False,
                         default="sgd",
-                        choices=["sgd", "adam"],
+                        choices=["sgd", "momentum"],
                         help="Choose wich solver will be used for training. Default: 'sgd'")
     parser.add_argument("-p", "--patience", type=validate_positive_int,
                         required=False,

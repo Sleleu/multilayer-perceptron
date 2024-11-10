@@ -1,6 +1,6 @@
 import numpy as np
 from srcs.WeightInitialiser import WeightInitialiser
-from srcs.optimizer import Sgd, Adam
+from srcs.optimizer import Sgd, Momentum
 from srcs.EarlyStopping import EarlyStopping
 from srcs.constants import ACTIVATIONS_FUNCTIONS, OUTPUT_ACTIVATIONS, LOSS_FUNCTIONS
 from srcs.utils import GREEN, YELLOW, CYAN, MAGENTA, END
@@ -27,11 +27,11 @@ class MLP:
         match (solver):
             case "sgd":
                 self.solver = Sgd(self.learning_rate)
-            case "adam":
-                self.solver = Adam(self.learning_rate)
+            case "momentum":
+                self.solver = Momentum(self.learning_rate)
             case _:
                 print(f"{YELLOW}Error: Unknow solver '{solver}'."
-                      f'Available choices: ["sgd", "adam"]{END}')
+                      f'Available choices: ["sgd", "momentum"]{END}')
                 exit(1)
                 
         # Select activation
