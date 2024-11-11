@@ -18,11 +18,11 @@ class Scaler:
         if self.method == "z_score":
             if self.mean is None or self.scale is None:
                 raise RuntimeError("You must fit the scaler before transforming data")
-            return (X - self.mean) / self.scale
+            return (X - self.mean) / (self.scale + 1e-15)
         elif self.method == 'minmax':
             if self.min is None or self.max is None:
                 raise RuntimeError("You must fit the scaler before transforming data.")
-            return (X - self.min) / (self.max - self.min)
+            return (X - self.min) / ((self.max - self.min) + 1e-15)
         else:
             raise ValueError("Method must be either 'z_score' or 'minmax'.")
     

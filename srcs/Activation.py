@@ -22,6 +22,7 @@ class Activation:
     
     @staticmethod
     def leaky_relu(Z, alpha=0.1):
+        Z = np.clip(Z, -500, 500)
         return np.where(Z > 0, Z, alpha * Z)
 
     @staticmethod

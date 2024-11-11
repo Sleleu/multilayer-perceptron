@@ -3,7 +3,7 @@ from srcs.WeightInitialiser import WeightInitialiser
 from srcs.optimizer import Sgd, Momentum
 from srcs.EarlyStopping import EarlyStopping
 from srcs.constants import ACTIVATIONS_FUNCTIONS, OUTPUT_ACTIVATIONS, LOSS_FUNCTIONS
-from srcs.utils import GREEN, YELLOW, CYAN, MAGENTA, END
+from srcs.utils import GREEN, YELLOW, CYAN, MAGENTA, END, get_accuracy
 
 class MLP:
     def __init__(
@@ -58,6 +58,9 @@ class MLP:
         self.loss = LOSS_FUNCTIONS[loss]
         self.loss_name = loss
         
+        if loss == "binaryCrossentropy" and self.output_layer_size != 1:
+            raise AttributeError("MLP with binaryCrossentropy need 1 output neuron")
+        
     def __str__(self):
         separator = f"{CYAN}═{END}" * 50
         output = [f"\n\t{GREEN}MODEL CONFIGURATION:{END}", separator]
@@ -103,9 +106,13 @@ class MLP:
     def back_propagate(self, X, y, output, A, W):
         m = X.shape[0]
         dW, db = [], []
-        dz = output.copy()
-        dz[np.arange(m), y] -= 1
-        dz /= m
+
+        if self.loss_name == "binaryCrossentropy":
+            dz = (output - y)
+        else:
+            dz = output.copy()
+            dz[np.arange(m), y] -= 1
+            dz /= m
         
         for i in reversed(range(len(W))):
             a_prev = A[i - 1] if i > 0 else X
@@ -152,11 +159,6 @@ class MLP:
         
         return W, b
 
-    def get_accuracy(self, X, y, W, b):
-        output, _ = self.feed_forward(X, W, b)
-        predictions = np.argmax(output, axis=1)
-        return np.mean(predictions == y)
-
     def fit(self, X_train, y_train, X_val = None, y_val = None, # to work : can use fit without val for modularity
             early_stopping: EarlyStopping = None):
         self.input_layer_size = X_train.shape[1]
@@ -177,14 +179,14 @@ class MLP:
 
             train_output, _ = self.feed_forward(X_train, W, b)
             val_output, _ = self.feed_forward(X_val, W, b)
-            
+
             try:
                 train_loss = self.loss(y_train, train_output)
                 val_loss = self.loss(y_val, val_output)
             except:
                 raise ValueError("Invalid loss function for this training model")
-            train_accuracy = self.get_accuracy(X_train, y_train, W, b)
-            val_accuracy = self.get_accuracy(X_val, y_val, W, b)
+            train_accuracy = get_accuracy(train_output, y_train, self.loss_name)
+            val_accuracy = get_accuracy(val_output, y_val, self.loss_name)
             
             self.train_losses.append(train_loss)
             self.val_losses.append(val_loss)

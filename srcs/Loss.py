@@ -4,10 +4,11 @@ from srcs.utils import GREEN, END
 class Loss:
 
     @staticmethod
-    def binary_cross_entropy(y_train, y_pred):
+    def binary_cross_entropy(y_true, y_pred):
         epsilon = 1e-15
-        m = y_train.shape[0]
-        loss = - 1 / m * np.sum(y_train * np.log(y_pred + epsilon) + (1 - y_train) * np.log(1 - y_pred + epsilon))
+        y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
+        m = y_true.shape[0]
+        loss = - 1 / m * np.sum(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
         return loss
 
     @staticmethod

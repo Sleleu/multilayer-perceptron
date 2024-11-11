@@ -68,7 +68,7 @@ def predict(model_path: str, data_path: str, scaler_params=None):
     print(results.head())
     print(f"{END}", end='')
     
-    # print(predictions)
-    # y_test = load("data/processed/test/y_test.csv", header=None).to_numpy().ravel().T
-    # print(y_test)
+    print(predictions)
+    y_test = load("data/processed/test/y_test.csv", header=None).to_numpy().ravel().T
+    print(y_test)
     return predicted_labels, probabilities
