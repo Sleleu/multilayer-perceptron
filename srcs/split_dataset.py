@@ -46,7 +46,7 @@ def create_sets(sets: tuple[pd.DataFrame], filepath: str, set_types: list[str]) 
         sets[i].to_csv(X_file, index=False, header=False)
         sets[i + n_sets].to_csv(y_file, index=False, header=False)  
 
-def split_dataset(dataset_name: str, train_size: float = 0.7, val_size: float = 0.15) -> None:
+def split_dataset(dataset_name: str, train_size: float = 0.6, val_size: float = 0.2) -> None:
     """Split dataset into train, validation and test sets"""
     if not 0 < train_size + val_size < 1:
         raise ValueError("Sum of train_size and val_size must be between 0 and 1")

@@ -185,8 +185,8 @@ class MLP:
                 val_loss = self.loss(y_val, val_output)
             except:
                 raise ValueError("Invalid loss function for this training model")
-            train_accuracy = get_accuracy(train_output, y_train, self.loss_name)
-            val_accuracy = get_accuracy(val_output, y_val, self.loss_name)
+            train_accuracy = get_accuracy(train_output, y_train)
+            val_accuracy = get_accuracy(val_output, y_val)
             
             self.train_losses.append(train_loss)
             self.val_losses.append(val_loss)

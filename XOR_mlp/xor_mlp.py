@@ -74,7 +74,7 @@ def predict():
     probabilities, _ = model.feed_forward(X, m_data['W'], m_data['b'])
     predictions = np.array(probabilities >= 0.5).astype(int)
     y_true = load("data/processed/test/y_test.csv", header=None).to_numpy()
-    accuracy = get_accuracy(predictions, y_true, model.loss_name)
+    accuracy = get_accuracy(predictions, y_true)
     star = "🌟" if accuracy == 1.0 else "💩"
     print(f"{GREEN}Accuracy : {CYAN}{accuracy*100:.2f}% {star}{END}")
 
@@ -94,3 +94,4 @@ if __name__ == "__main__":
         predict()
     except Exception as error:
         print(f"{YELLOW}{__name__}: {type(error).__name__}: {error}{END}")
+        exit(1)
