@@ -47,28 +47,23 @@ def parse_arguments():
                         to split the data, 'train' to train the model, \
                         or 'predict' to make a prediction.")
     parser.add_argument("-d", "--dataset", type=str,
-                        required=False,
                         help="Path to the CSV file containing the data.")
     parser.add_argument("-e", "--epochs", 
                         type=validate_positive_int,
                         default=84,
-                        required=False,
                         help="Number of epochs for training. Must be positive. Default: 84")
     parser.add_argument("-l", "--layer",
                         nargs='+',
                         type=int,
                         default=[24, 24, 24],
-                        required=False,
                         help="Number and density of layers in the network. Minimum 2 layers required. Default: [24, 24, 24]")
     parser.add_argument("-b", "--batch_size",
                         type=validate_positive_int,
                         default=8,
-                        required=False,
                         help="Batch size for training. Must be positive. Default: 8")
     parser.add_argument("-r", "--learning_rate",
                         type=validate_positive_float,
                         default=0.0314,
-                        required=False,
                         help="Learning rate for training. Must be positive. Default: 0.0314")
     parser.add_argument("-o", "--loss",
                         type=str,
@@ -76,44 +71,35 @@ def parse_arguments():
                                 "categoricalCrossentropy",
                                 "sparseCategoricalCrossentropy"],
                         default="sparseCategoricalCrossentropy",
-                        required=False,
                         help="Loss function to use. Default: 'sparseCategoricalCrossentropy'")
     parser.add_argument("-s", "--seed", 
                         type=validate_positive_int,
                         default=None,
-                        required=False,
                         help="Generate a random seed to track results. Default: None")
     parser.add_argument("-w", "--weight_initializer", type=str,
-                        required=False,
                         default="HeUniform",
                         choices=["HeNormal", "HeUniform", "GlorotNormal", "GlorotUniform"],
                         help="Choose which weight initialisation method will be used for training. Default: 'HeUniform'")
     parser.add_argument("--standardize", type=str,
-                        required=False,
                         default="z_score",
                         choices=["z_score", "minmax"],
                         help="Choose which standardization method will be used for training. Default: 'z_score'")
     parser.add_argument("--solver", type=str,
-                        required=False,
                         default="sgd",
                         choices=["sgd", "momentum"],
                         help="Choose wich solver will be used for training. Default: 'sgd'")
     parser.add_argument("-p", "--patience", type=validate_positive_int,
-                        required=False,
                         default=5,
                         help="Number of epochs to wait before early stopping. Default: 5")
     parser.add_argument("--activation", type=str,
-                        required=False,
                         default='sigmoid',
                         choices=["sigmoid", "relu", "leakyrelu", "tanh"],
                         help="Choose the activation function for hidden layers. Default: 'sigmoid'")
     parser.add_argument("--output_activation", type=str,
-                        required=False,
                         default='softmax',
                         choices=["sigmoid", "softmax"],
                         help="Choose the activation function for output layer. Default: 'softmax'")
     parser.add_argument("-m", "--model", type=str,
-                        required=False,
                         help="Path to saved model file for prediction")
 
     args = parser.parse_args()
@@ -157,4 +143,4 @@ if __name__ == "__main__":
             scaler_params = np.load('scaler_params.npy', allow_pickle=True).item()
             predictions = predict(args.model, args.dataset, scaler_params)
         except FileNotFoundError:
-            print("Error: Model file or scaler parameters not found")
+            print(f"{YELLOW}Error: Model file or scaler parameters not found{END}")
