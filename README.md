@@ -14,7 +14,7 @@
 
 ## 1. About the Project
 
-The aim of this project is to implement a **multilayer perceptron** to predict whether a cancer diagnosis (based on a breast cancer dataset from Wisconsin) is malignant or benign.  
+The aim of this project is to implement a **multilayer perceptron** to predict whether a breast tumor (based on the Wisconsin Breast Cancer dataset) is malignant or benign.  
 Dataset source: [Kaggle - Breast Cancer Wisconsin Data](https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data).
 
 ### What is a Multilayer Perceptron?
